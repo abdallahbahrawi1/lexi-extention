@@ -1,0 +1,48 @@
+/* Container holding the card */
+.flip-card {
+  background-color: transparent;
+  width: 200px;
+  height: 300px;
+  perspective: 1000px; /* This gives the 3D effect */
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.8s; /* Animation duration */
+  transform-style: preserve-3d; /* Enable 3D space for child elements */
+}
+
+.flip-card:hover .flip-card-inner {
+  transform: rotateY(180deg); /* Rotate the card on hover */
+}
+
+/* Front and back sides of the card */
+.flip-card-front,
+.flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden; /* Ensure the back is hidden when not flipped */
+  backface-visibility: hidden; /* For all browsers */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Front side style */
+.flip-card-front {
+  background-color: #fff;
+  color: black;
+}
+
+/* Back side style */
+.flip-card-back {
+  background-color: #007BFF;
+  color: white;
+  transform: rotateY(180deg); /* Rotate the back side to face the front */
+}
