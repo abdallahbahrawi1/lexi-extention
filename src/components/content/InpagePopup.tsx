@@ -1,53 +1,56 @@
 import React from 'react';
 import { FaBook, FaLanguage, FaVolumeUp, FaBookmark } from 'react-icons/fa'; // Importing the required icons
+// import './InpagePopup.css'; // Import the CSS file for styling
 
+const InpagePopup = ({ selectedText }) => {
 
-const InpagePopup = ({selectedText}) => {
-
-  const handleClick = (action: string) => {
+  const handleClick = (action) => {
     const message = { action, text: selectedText }; // Include selectedText in the message
     chrome.runtime.sendMessage(message, (response) => {
-      // Handle the response here
-      if (chrome.runtime.lastError) {
-        console.error(chrome.runtime.lastError.message);
-      } else {
-        console.log('Response:', response);
-      }
+      console.log('Response:', response);
     });
   };
-  
+
+  // Function to update the UI dynamically with the streamed content
+  const updateUI = (text) => {
+    const resultElement = document.getElementById('result'); // Ensure there's an element with id='result'
+    if (resultElement) {
+      resultElement.textContent = text; // Update the result area with new content
+    }
+  };
+
   return (
-    <div className="flex justify-between items-center p-2 bg-gray-100 rounded-lg shadow-md w-48">
+    <div className="popup-container">
       <button
         className="icon-button"
         title="Define"
         onClick={() => handleClick('Define')}
       >
-        <FaBook className="text-gray-500 text-lg transition-transform transform hover:scale-110 hover:text-black duration-200" />
+        <FaBook className="icon" />
       </button>
-      <div className="w-px h-5 bg-gray-300 mx-1"></div>
+      <div className="divider"></div>
       <button
         className="icon-button"
         title="Translate"
         onClick={() => handleClick('Translate')}
       >
-        <FaLanguage className="text-gray-500 text-lg transition-transform transform hover:scale-110 hover:text-black duration-200" />
+        <FaLanguage className="icon" />
       </button>
-      <div className="w-px h-5 bg-gray-300 mx-1"></div>
+      <div className="divider"></div>
       <button
         className="icon-button"
         title="Pronounce"
         onClick={() => handleClick('Pronounce')}
       >
-        <FaVolumeUp className="text-gray-500 text-lg transition-transform transform hover:scale-110 hover:text-black duration-200" />
+        <FaVolumeUp className="icon" />
       </button>
-      <div className="w-px h-5 bg-gray-300 mx-1"></div>
+      <div className="divider"></div>
       <button
         className="icon-button"
         title="Save"
         onClick={() => handleClick('Save')}
       >
-        <FaBookmark className="text-gray-500 text-lg transition-transform transform hover:scale-110 hover:text-black duration-200" />
+        <FaBookmark className="icon" />
       </button>
     </div>
   );

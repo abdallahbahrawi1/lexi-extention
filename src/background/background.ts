@@ -1,6 +1,4 @@
 
-
-
 type Word = {
   word: string;
   memorized: boolean;
@@ -48,7 +46,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   const { action, text } = message;
 
   if (!action) {
@@ -59,69 +57,33 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   let lowerCaseAction = action.toLowerCase();
 
   switch (lowerCaseAction) {
-    case 'define':
-      console.log('Define action');
-      // Handle the define action
-      // main(text)
-      // .then(definition => {
-      //   sendResponse({ result: definition });
-      // })
-      // .catch(error => {
-      //   sendResponse({ error: `Failed to get definition: ${error.message}` });
-      // });
-      break;
-    case 'translate':
-      // Handle the translate action
+    case 'define': {
+      sendResponse({ result: `Defining ${text}` });
+      break; 
+    }
+    case 'translate': {
       sendResponse({ result: `Translation for ${text}` });
       break;
-    case 'pronounce':
-      // Handle the pronounce action
+    }
+    case 'pronounce': {
       sendResponse({ result: `Pronouncing ${text}` });
       break;
-    case 'save':
+    }
+    case 'save': {
       saveSentence(text)
-      .then(() => {
-        sendResponse({ result: `Text "${text}" saved successfully.` });
-      })
-      .catch((error) => {
-        sendResponse({ error: `Failed to save text: ${error.message}` });
-      });
+        .then(() => {
+          sendResponse({ result: `Text "${text}" saved successfully.` });
+        })
+        .catch((error) => {
+          sendResponse({ error: `Failed to save text: ${error.message}` });
+        });
       break;
-    default:
+    }
+    default: {
       sendResponse({ error: `Unknown action: ${action}` });
       break;
+    }
   }
 
   return true;
 });
-
-import Groq from 'groq-sdk';
-const GROQ_API_KEY = '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';
-
-const groq = new Groq({ apiKey: GROQ_API_KEY });
-
-// async function main(text) {
-//   const chatCompletion = await groq.chat.completions.create({
-//     "messages": [
-//       {
-//         "role": "user",
-//         "content": `Define the word ${text}. Only provide the definition, nothing else.`
-//       }
-//     ],
-//     "model": "llama3-groq-70b-8192-tool-use-preview",
-//     "temperature": 0.5,
-//     "max_tokens": 1024,
-//     "top_p": 0.65,
-//     "stream": true,
-//     "stop": null
-//   });
-
-//   let result = '';
-//   for await (const chunk of chatCompletion) {
-//     result += chunk.choices[0]?.delta?.content || '';
-//   }
-
-//   return result.trim(); // Return the processed output
-// }
-
-// main('apple').then((text)=>console.log(text)).catch(console.error);

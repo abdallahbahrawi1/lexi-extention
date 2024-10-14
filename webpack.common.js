@@ -3,7 +3,6 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const tailwindcss = require('tailwindcss');
 const autoprefixer = require('autoprefixer');
-const { split } = require('postcss/lib/list');
 
 module.exports = {
   entry: {
@@ -25,7 +24,7 @@ module.exports = {
           loader: 'postcss-loader',
           options: {
             postcssOptions: {
-              // ident: 'postcss',
+              ident:'postcss',
               plugins: [
                 tailwindcss,
                 autoprefixer,
@@ -48,11 +47,12 @@ module.exports = {
   output: {
     filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),
+    clean: true,
   },
   optimization: {
     splitChunks: {
       chunks(chunk){
-        return chunk.name !== 'content';
+        return chunk.name !== 'content';  // Exclude content script from splitting
       }
     },
   },
@@ -62,12 +62,15 @@ module.exports = {
         {
           from: path.resolve('src/static'),
           to: path.resolve('dist'),
-        },
+        },{
+          from: path.resolve('src/content/content.css'),
+          to: path.resolve('dist'),
+        }
       ],
     }),
 
-    ...getHtmlPlugins([
-      'popup'
+    ...getHtmlPlugins([ 
+      'popup',
     ])
   ],
 };
