@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { extractWordsFromPage } from './utils';
-import InpagePopup from '../components/content/InpagePopup';
+import InpagePopup from './components/InpagePopup';
 
 const Content: React.FC = () => {
   const [words, setWords] = useState<{ word: string; memorized: boolean }[]>([]);
@@ -13,9 +13,14 @@ const Content: React.FC = () => {
     const extractedWords = extractWordsFromPage();
     setWords(extractedWords);
 
-    chrome.runtime.sendMessage({ words: extractedWords }, (response: { status: string }) => {
-      console.log(response.status);
+    chrome.runtime.sendMessage({ words: extractedWords }, (response) => {
+      if (response && response.status) {
+        console.log(response.status);
+      } else {
+        console.error("Error or no response received:", response);
+      }
     });
+  
 
     const handleMouseUp = (event: MouseEvent) => {
 

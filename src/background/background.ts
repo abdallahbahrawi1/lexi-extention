@@ -1,8 +1,4 @@
-
-type Word = {
-  word: string;
-  memorized: boolean;
-};
+import { Word } from "../types/types";
 
 const saveWord = (wordObj: Word) => {
   return new Promise<void>((resolve) => {
@@ -32,18 +28,19 @@ const saveSentence = (sentence: string) => {
   return Promise.all(wordsArray.map(saveWord));
 };
 
-// Listen for messages from the content script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-
   if (request.words) {
-      // Get words from local storage (if they exist) and merge them with the new ones
-      const storedWords: { word: string; memorized: boolean }[] = request.words || [];
-      chrome.storage.local.set({ words: storedWords }, () => {
-        console.log('Words saved:', storedWords);
-      });
-  
-    sendResponse({ status: "Words received" });
+    const storedWords = request.words || [];
+    chrome.storage.local.set({ words: storedWords }, () => {
+      console.log('Words saved:', storedWords);
+      sendResponse({ status: "Words received" });  // Send the response back
+    });
+
+    return true; // Indicate async response
+  } else {
+    sendResponse({ error: "No words in request" });
   }
+  return true;  // Always indicate async response
 });
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
@@ -51,39 +48,44 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 
   if (!action) {
     sendResponse({ error: 'Action is missing' });
-    return true; // Indicate that the response will be sent asynchronously
+    return true; 
   }
 
-  let lowerCaseAction = action.toLowerCase();
-
-  switch (lowerCaseAction) {
-    case 'define': {
-      sendResponse({ result: `Defining ${text}` });
-      break; 
-    }
-    case 'translate': {
-      sendResponse({ result: `Translation for ${text}` });
-      break;
-    }
-    case 'pronounce': {
-      sendResponse({ result: `Pronouncing ${text}` });
-      break;
-    }
-    case 'save': {
-      saveSentence(text)
-        .then(() => {
-          sendResponse({ result: `Text "${text}" saved successfully.` });
-        })
-        .catch((error) => {
-          sendResponse({ error: `Failed to save text: ${error.message}` });
-        });
-      break;
-    }
-    default: {
-      sendResponse({ error: `Unknown action: ${action}` });
-      break;
-    }
+  const lowerCaseAction = action.toLowerCase();
+  try {
+    const result = await handleAction(lowerCaseAction, text);
+    sendResponse({ result });
+  } catch (error) {
+    sendResponse({ error: error.message });
   }
 
-  return true;
+  return true; // Indicate that the response will be sent asynchronously
 });
+
+const handleAction = async (action, text) => {
+  switch (action) {
+    case 'define':
+      return defineText(text);
+    case 'translate':
+      return translateText(text);
+    case 'pronounce':
+      return pronounceText(text);
+    case 'save':
+      return saveSentence(text);
+    default:
+      throw new Error(`Unknown action: ${action}`);
+  }
+};
+
+const defineText = (text) => {
+  return `Defining ${text}`;
+};
+
+const translateText = (text) => {
+  return `Translation for ${text}`;
+};
+
+const pronounceText = (text) => {
+  return `Pronouncing ${text}`;
+};
+

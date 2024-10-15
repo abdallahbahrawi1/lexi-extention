@@ -26,6 +26,7 @@
     "react-router-dom": "^6.26.2",
     "stopword": "^3.1.1",
     "stopwords": "^0.0.9",
+    "together-ai": "^0.6.0-alpha.4",
     "ts-loader": "^9.5.1",
     "typescript": "^5.6.3",
     "url-loader": "^4.1.1"
