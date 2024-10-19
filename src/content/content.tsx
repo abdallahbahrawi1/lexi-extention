@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { extractWordsFromPage } from './utils';
 import InpagePopup from './components/InpagePopup';
 
+import { ActionType } from '../types/types';
+
 const Content: React.FC = () => {
   const [words, setWords] = useState<{ word: string; memorized: boolean }[]>([]);
   const [selectedText, setSelectedText] = useState<string | null>(null);
@@ -13,14 +15,14 @@ const Content: React.FC = () => {
     const extractedWords = extractWordsFromPage();
     setWords(extractedWords);
 
-    chrome.runtime.sendMessage({ words: extractedWords }, (response) => {
-      if (response && response.status) {
-        console.log(response.status);
+    const message = { action: ActionType.SAVEEXTRACTEDWORDS, words: extractedWords };
+    chrome.runtime.sendMessage(message, (response) => {
+      if (response.error) {
+        console.error('Error:', response.error);
       } else {
-        console.error("Error or no response received:", response);
+        console.log('Action result:', response.result);
       }
     });
-  
 
     const handleMouseUp = (event: MouseEvent) => {
 
@@ -38,6 +40,10 @@ const Content: React.FC = () => {
     };
 
     const handleClickOutside = (event: MouseEvent) => {
+      // Only handle left-click (button 0) to clear the selection, ignoring right-clicks (button 2)
+
+      if (event.button !== 0) return;
+
       // If clicking outside the popup, clear the selected text and hide the popup
       if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
         setSelectedText(null); // Hide the popup

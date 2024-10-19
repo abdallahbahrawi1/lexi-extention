@@ -1,91 +1,128 @@
 import { Word } from "../types/types";
+import { ActionType } from "../types/types";
 
-const saveWord = (wordObj: Word) => {
-  return new Promise<void>((resolve) => {
-    chrome.storage.local.get(['savedWords'], (result) => {
+const saveWord = (wordObj: Word): void => {
+  try {
+    chrome.storage.local.get(['savedWords'], async (result) => {
       let savedWords = result.savedWords || [];
+      
       // Check if the word already exists
       if (!savedWords.some((w: Word) => w.word === wordObj.word)) {
+        const definition = await handleAction(ActionType.DEFINE, wordObj.word);
+        wordObj.definition = definition;
         // Add the new word if it doesn't exist
         savedWords.push(wordObj);
-        chrome.storage.local.set({ savedWords }, () => {
-          resolve();
-        });
-      } else {
-        resolve(); // Word already exists, resolve immediately
+        chrome.storage.local.set({ savedWords });
       }
     });
-  });
+  } catch (error) {
+    console.error("Error saving word:", error);
+    throw new Error("Failed to save word");
+  }
 };
 
 
-const saveSentence = (sentence: string) => {
-  const wordsArray = sentence.split(/\s+/).map((word) => ({
-    word,
-    memorized: false
-  }));
+const saveSentence = (sentence: string): void => {
+  try {
+    const wordsArray = sentence.split(/\s+/).map((word) => ({
+      word,
+      memorized: false,
+      definition: '' // Add a default empty definition
+    }));
 
-  return Promise.all(wordsArray.map(saveWord));
+    wordsArray.forEach(saveWord);
+  } catch (error) {
+    console.error("Error saving sentence:", error);
+    throw new Error("Failed to save sentence");
+  }
 };
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.words) {
+  if (request.action === ActionType.SAVEEXTRACTEDWORDS) {
     const storedWords = request.words || [];
-    chrome.storage.local.set({ words: storedWords }, () => {
-      console.log('Words saved:', storedWords);
-      sendResponse({ status: "Words received" });  // Send the response back
+    try {
+      chrome.storage.local.set({ words: storedWords }, () => {
+        console.log('Words saved:', storedWords);
+        sendResponse({ result: "Words received" });
+      });
+    } catch (error) {
+      sendResponse({ error: error.message });
+    }
+  } else if (request.action && request.text) {
+    const { action, text, language } = request;
+    (async () => {
+      try {
+        const result = await handleAction(action, text, language);
+        sendResponse({ result });
+      } catch (error) {
+        sendResponse({ error: error.message });
+      }
+    })();
+  }
+  return true; 
+});
+
+const handleAction =  async (action: ActionType, text: string, language?: string) => {
+
+  if (action === ActionType.TRANSLATE && language) {
+    console.log('Translating text:', text, 'to', language);
+    return await processText(text, action, language); 
+  }
+
+  if (
+    action === ActionType.DEFINE || 
+    action === ActionType.SUMMARIZE || 
+    action === ActionType.EXPLAIN 
+  ) {
+    console.log('Processing text:', text, action);
+    return await processText(text, action);
+  
+  }  else if (action === ActionType.SAVE) {
+    return saveSentence(text);
+  }
+  else {
+    throw new Error(`Unknown action: ${action}`);
+  }
+  
+};
+
+const processText = async (text: string, action: ActionType, language?: string) => {
+  try {
+    // Validate the text and action inputs
+    if (!text || typeof text !== 'string') {
+      throw new Error('Invalid text provided');
+    }
+
+    if (!action || !Object.values(ActionType).includes(action)) {
+      throw new Error('Invalid action provided');
+    }
+
+    const queryParams: Record<string, string> = { text, action };
+    if (action === ActionType.TRANSLATE && language) {
+      queryParams.language = language; // Add language to query if translating
+    }
+
+    // Encode text and action to include them safely in the URL
+    const query = new URLSearchParams({ text, action, language }).toString();
+    console.log('Query:', query);
+    // Make a GET request with the text and action as query parameters
+    const response = await fetch(`https://lexi-server-z4at.onrender.com/api/ai?${query}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
 
-    return true; // Indicate async response
-  } else {
-    sendResponse({ error: "No words in request" });
-  }
-  return true;  // Always indicate async response
-});
+    if (!response.ok) {
+      throw new Error('Failed to fetch AI response');
+    }
 
-chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-  const { action, text } = message;
+    const aiResponse = await response.text();
 
-  if (!action) {
-    sendResponse({ error: 'Action is missing' });
-    return true; 
-  }
-
-  const lowerCaseAction = action.toLowerCase();
-  try {
-    const result = await handleAction(lowerCaseAction, text);
-    sendResponse({ result });
+    // Return the AI response
+    return aiResponse;
   } catch (error) {
-    sendResponse({ error: error.message });
-  }
-
-  return true; // Indicate that the response will be sent asynchronously
-});
-
-const handleAction = async (action, text) => {
-  switch (action) {
-    case 'define':
-      return defineText(text);
-    case 'translate':
-      return translateText(text);
-    case 'pronounce':
-      return pronounceText(text);
-    case 'save':
-      return saveSentence(text);
-    default:
-      throw new Error(`Unknown action: ${action}`);
+    console.error(error);
+    return `Failed to process ${text}`;
   }
 };
-
-const defineText = (text) => {
-  return `Defining ${text}`;
-};
-
-const translateText = (text) => {
-  return `Translation for ${text}`;
-};
-
-const pronounceText = (text) => {
-  return `Pronouncing ${text}`;
-};
-

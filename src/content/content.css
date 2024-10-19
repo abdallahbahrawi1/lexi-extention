@@ -47,4 +47,36 @@
   opacity: 1;
 }
 
+.icon-button-container {
+  position: relative;
+  display: inline-block;
+}
 
+.tooltip {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  opacity: 0;
+  animation: fadeInOut 2s forwards;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

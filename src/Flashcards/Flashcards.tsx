@@ -3,7 +3,6 @@ import Flashcard from '../components/Flashcards/Flashcard';
 import Controls from '../components/Flashcards/Controls';
 import ProgressBar from '../components/Flashcards/ProgressBar';
 import MemorizationButton from '../components/Flashcards/MemorizationButton';
-// import "index.css"
 
 
 const Flashcards = () => {
@@ -19,6 +18,7 @@ const Flashcards = () => {
   const loadWords = async () => {
     chrome.storage.local.get(['savedWords'], (result) => {
       const savedWords = result.savedWords || [];
+      console.log(savedWords)
       setWords(savedWords);
       if (savedWords.length > 0) {
         showWord(0);

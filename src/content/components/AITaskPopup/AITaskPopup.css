@@ -1,0 +1,75 @@
+
+.aitask-popup {
+  width: 300px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.aitask-popup__header {
+  background-color: #3498db;
+  color: white;
+  padding: 12px 16px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.aitask-popup__content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.aitask-popup__highlighted-text {
+  font-size: 14px;
+  color: #7f8c8d;
+  max-height: 60px;
+  overflow-y: auto;
+  border-bottom: 1px solid #ecf0f1;
+  padding-bottom: 8px;
+}
+
+.aitask-popup__ai-result {
+  font-size: 16px;
+  color: #2c3e50;
+  line-height: 1.4;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.aitask-popup__copy-button {
+  background-color: #2980b9;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.aitask-popup__copy-button:hover {
+  background-color: #3498db;
+}
+
+/* Custom scrollbar styles */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

@@ -1,6 +1,6 @@
 import React from 'react';
 import WordItem from './WordItem';
-import { Word } from '../../types/types';
+import { ActionType, Word } from '../../types/types';
 
 interface WordListProps {
   words: Word[];
@@ -8,29 +8,25 @@ interface WordListProps {
 }
 
 const WordList: React.FC<WordListProps> = ({ words, setWords }) => {
-  const saveWord = (wordObj: Word) => {
-    return new Promise<void>((resolve) => {
-      chrome.storage.local.get(['savedWords'], (result) => {
-        let savedWords = result.savedWords || [];
-        if (!savedWords.some((w: Word) => w.word === wordObj.word)) {
-          savedWords.push(wordObj);
-          chrome.storage.local.set({ savedWords }, () => {
-            resolve();
-          });
-        } else {
-          resolve();
-        }
-      });
+
+
+  const saveWord = (action: ActionType, wordObj: string) => {
+    const message: { action: any; text: any; language?: string } = { action: action, text: wordObj };
+    chrome.runtime.sendMessage(message, (response) => {
+      if (response.error) {
+        console.error('Error:', response.error);
+      } else {
+        console.log('Response:', response.result);
+      }
     });
   };
 
-  const saveWordHandler = (index: number) => {
-    const wordObj = words[index];
-    saveWord(wordObj).then(() => {
-      const newWords = [...words];
-      newWords[index] = { ...newWords[index], saved: true };
-      setWords(newWords);
-    });
+  const saveWordHandler = async (index: number) => {
+    const wordObj = words[index].word;
+    saveWord(ActionType.SAVE, wordObj);
+    const newWords = [...words];
+    newWords[index] = { ...newWords[index], saved: true };
+    setWords(newWords);
   };
 
   if (words.length === 0) {

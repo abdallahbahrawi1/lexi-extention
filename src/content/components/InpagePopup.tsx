@@ -1,20 +1,36 @@
-import React, { useEffect, useState } from 'react';
-import { FaBook, FaLanguage, FaVolumeUp, FaBookmark, FaFileAlt, FaCopy, FaCommentAlt, FaEllipsisH } from 'react-icons/fa'; 
+import React, { useEffect, useRef, useState } from 'react';
+import { FaBook, FaVolumeUp, FaBookmark, FaFileAlt, FaCopy, FaCommentAlt, FaEllipsisH } from 'react-icons/fa'; 
 import { BsTranslate } from "react-icons/bs";
-
-import FeaturesMenu from './FeaturesMenu';
+import FeaturesMenu from './FeaturesMenu/FeaturesMenu';
+import { ActionType } from '../../types/types';
+import AITaskPopup from './AITaskPopup/AITaskPopup';
+import TranslationPopup from './TranslationPopup/TranslationPopup';
 
 const InpagePopup = ({ selectedText }) => {
+  const hasMounted = useRef(false);
+
   const [isPopupVisible, setPopupVisible] = useState(false);
+  const [aiResult, setAiResult] = useState('');
+  const [aiAction, setAIAction] = useState('');
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [showTranslatePopup, setShowTranslatePopup] = useState(false); 
+  const [selectedLanguage, setSelectedLanguage] = useState('English'); 
   const [pinnedIcons, setPinnedIcons] = useState({
-    Define: false,
+    Define: true,
     Translate: true,
-    Summarize: false,
-    Explain: false,
+    Summarize: true,
+    Explain: true,
     Save: true,
-    Pronounce: false,
     Copy: true,
   });
+
+  useEffect(() => {
+    if (hasMounted.current) {
+      handleClick(ActionType.TRANSLATE);
+    } else {
+      hasMounted.current = true;
+    }
+  }, [selectedLanguage]);
 
   // Load pinnedIcons from localStorage if available
   useEffect(() => {
@@ -31,13 +47,40 @@ const InpagePopup = ({ selectedText }) => {
 
   // Handle action click and send message to background script
   const handleClick = (action) => {
-    const message = { action: action, text: selectedText };
+    const message: { action: any; text: any; language?: string } = { action: action, text: selectedText };
+
+    if (action === ActionType.TRANSLATE) {
+      message.language = selectedLanguage;
+      setShowTranslatePopup(true);
+    }
+
     chrome.runtime.sendMessage(message, (response) => {
-      if (response.error) {
+      if ( response.error) {
         console.error('Error:', response.error);
       } else {
-        console.log('Action result:', response.result);
+        console.log('Response:', response.result);
+        if (action === ActionType.TRANSLATE) {
+          setShowTranslatePopup(true);
+        }else{
+          showTranslatePopup && setShowTranslatePopup(false);
+        }
+        setAIAction(action);
+        setAiResult(response.result);
       }
+    });
+  };
+
+  const handleCopyClick = () => {
+    navigator.clipboard.writeText(selectedText).then(() => {
+      // Show the "Copied!" tooltip
+      setTooltipVisible(true);
+
+      // Hide the tooltip after 2 seconds
+      setTimeout(() => {
+        setTooltipVisible(false);
+      }, 2000);
+    }).catch(err => {
+      console.error('Failed to copy text: ', err);
     });
   };
 
@@ -49,7 +92,7 @@ const InpagePopup = ({ selectedText }) => {
           <button
             className="icon-button"
             title="Define"
-            onClick={() => handleClick('Define')}
+            onClick={() => handleClick(ActionType.DEFINE)}  
           >
             <FaBook className="icon" />
           </button>
@@ -59,7 +102,7 @@ const InpagePopup = ({ selectedText }) => {
           <button
             className="icon-button"
             title="Translate"
-            onClick={() => handleClick('Translate')}
+            onClick={() => handleClick(ActionType.TRANSLATE)}
           >
             <BsTranslate className="icon" />
           </button>
@@ -69,6 +112,7 @@ const InpagePopup = ({ selectedText }) => {
           <button 
             className="icon-button"
             title="Summarize"
+            onClick={() => handleClick(ActionType.SUMMARIZE)}
           >
             <FaFileAlt className="icon"/>
           </button>
@@ -78,6 +122,7 @@ const InpagePopup = ({ selectedText }) => {
           <button
             className="icon-button"
             title="Explain"
+            onClick={() => handleClick(ActionType.EXPLAIN)}
           >
             <FaCommentAlt className="icon"/>
           </button>
@@ -87,29 +132,26 @@ const InpagePopup = ({ selectedText }) => {
           <button
             className="icon-button"
             title="Save"
-            onClick={() => handleClick('Save')}
-          >
+            onClick={() => handleClick(ActionType.SAVE)}
+            >
             <FaBookmark className="icon" />
           </button>
         )}
 
-        {pinnedIcons.Pronounce && (
-          <button
-            className="icon-button"
-            title="Pronounce"
-            onClick={() => handleClick('Pronounce')}
-          >
-            <FaVolumeUp className="icon" />
-          </button>
-        )}
-
         {pinnedIcons.Copy && (
-          <button
-            className="icon-button"
-            title="Copy"
-          >
-            <FaCopy className="icon"/>
-          </button>
+          <div className="icon-button-container">
+            <button
+              className="icon-button"
+              title="Copy"
+              onClick={handleCopyClick}
+            >
+              <FaCopy className="icon" />
+            </button>
+      
+            {tooltipVisible && (
+              <div className="tooltip">Copied!</div>
+            )}
+          </div>
         )}
 
         <div className="divider"></div>
@@ -124,6 +166,14 @@ const InpagePopup = ({ selectedText }) => {
 
       </div>
       {isPopupVisible && <FeaturesMenu pinnedIcons={pinnedIcons} setPinnedIcons={setPinnedIcons} />}
+      {!showTranslatePopup && aiResult && <AITaskPopup aiResultText={aiResult} action={aiAction} selectedText={selectedText}/>}
+      {showTranslatePopup && 
+        <TranslationPopup 
+        aiResultText={aiResult} 
+        selectedLanguage={selectedLanguage} 
+        setSelectedLanguage={setSelectedLanguage} 
+        selectedText={selectedText}/>
+      }
     </>
   );
 };

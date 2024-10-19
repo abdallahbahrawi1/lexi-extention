@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   FaBook,
-  FaVolumeUp,
   FaBookmark,
   FaFileAlt,
   FaCopy,
@@ -10,6 +9,7 @@ import {
 } from 'react-icons/fa';
 import './FeaturesMenu.css';
 import { BsTranslate } from 'react-icons/bs';
+import { ActionType } from '../../../types/types';
 
 const FeaturesMenu = ({ pinnedIcons, setPinnedIcons }) => {
 
@@ -35,7 +35,7 @@ const FeaturesMenu = ({ pinnedIcons, setPinnedIcons }) => {
   return (
     <div className="unique-popup">
       <ul className="unique-icon-list">
-        {['Define', 'Translate', 'Summarize', 'Explain', 'Save', 'Pronounce', 'Copy'].map((label, index) => (
+        {[ActionType.DEFINE, ActionType.TRANSLATE, ActionType.SUMMARIZE, ActionType.EXPLAIN, ActionType.SAVE, ActionType.COPY].map((label, index) => (
           <li
             key={index}
             className={`unique-icon-item ${pinnedIcons[label] ? 'pinned' : ''}`}
@@ -45,8 +45,7 @@ const FeaturesMenu = ({ pinnedIcons, setPinnedIcons }) => {
             {index === 2 && <FaFileAlt className="unique-icon" />}
             {index === 3 && <FaCommentAlt className="unique-icon" />}
             {index === 4 && <FaBookmark className="unique-icon" />}
-            {index === 5 && <FaVolumeUp className="unique-icon" />}
-            {index === 6 && <FaCopy className="unique-icon" />}
+            {index === 5 && <FaCopy className="unique-icon" />}
 
             <span className="unique-icon-label">{label}</span>
             <FaThumbtack
