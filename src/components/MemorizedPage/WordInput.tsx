@@ -9,7 +9,7 @@ const WordInput: React.FC<WordInputProps> = ({ memorizedWords, setMemorizedWords
   const [newWord, setNewWord] = useState<string>("");
 
   const addWord = () => {
-    if (newWord && !memorizedWords.find((w) => w.word === newWord)) {
+    if (newWord.trim() && !memorizedWords.find((w) => w.word === newWord)) {
       const newWordObj = { word: newWord, memorized: true };
       const updatedWords = [newWordObj, ...memorizedWords];
       setMemorizedWords(updatedWords);

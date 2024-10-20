@@ -8,9 +8,14 @@ interface ActionButtonsProps {
 
 const ActionButtons: React.FC<ActionButtonsProps> = ({ setMemorizedWords }) => {
   
-  const clearAllWords = () => {
-    setMemorizedWords([]);  
-    chrome.storage.local.set({ memorized: [] });  
+  const clearAllWords = async () => {
+    try {
+      setMemorizedWords([]);
+      await chrome.storage.local.set({ memorized: [] });
+      console.log("All memorized words cleared successfully");
+    } catch (error) {
+      console.error("Error clearing memorized words:", error);
+    }
   };
   
   return (

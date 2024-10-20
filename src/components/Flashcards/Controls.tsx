@@ -1,12 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Word } from '../../types/types';
 
 interface ControlsProps {
   currentIndex: number;
   total: number;
-  setCurrentIndex: (index: number) => void; // Add setCurrentIndex
-  words: any[]; // Add the words prop
-  setWords: (newWords: any[]) => void; // Add the setWords prop
+  setCurrentIndex: (index: number) => void; 
+  words: Word[]; 
+  setWords: (newWords: Word[]) => void; 
 }
 
 const Controls: React.FC<ControlsProps> = ({ currentIndex, total, setCurrentIndex, words, setWords }) => {

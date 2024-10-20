@@ -2,6 +2,7 @@ export interface Word {
   definition: string | void;
   word: string;
   saved?: boolean; 
+  memorized?: boolean;
 }
 
 export enum ActionType {
