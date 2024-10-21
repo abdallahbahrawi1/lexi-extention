@@ -14,12 +14,16 @@
 
 1. Clone or download this repository:
    ```bash
-   git clone https://github.com/yourusername/lexilearn-extension.git
+   git clone https://github.com/abdallahbahrawi1/lexi-extention.git
    ```
-2. Open Chrome and go to chrome://extensions/.
-3. Enable "Developer mode" by toggling the switch in the top right corner.
-4. Click the "Load unpacked" button and select the extension's directory (lexilearn-extension folder).
-5. The LexiLearn extension will now be added to your Chrome browser!
+2. Build the extension.
+   ```bash
+   yarn watch
+   ```
+3. Open Chrome and go to chrome://extensions/.
+4. Enable "Developer mode" by toggling the switch in the top right corner.
+5. Click the "Load unpacked" button and select the **dist** folder under the extension's directory (lexilearn-extension folder).
+6. The LexiLearn extension will now be added to your Chrome browser!
 ## 📖 **How to Use**
 1. Once installed, you'll see the **LexiLearn** icon in your Chrome toolbar.
 2. Highlight any word or phrase on a webpage.
