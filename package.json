@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "watch": "webpack --watch --progress --config webpack.dev.js"
+    "watch": "webpack --watch --progress --config webpack.prod.js"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.6.0",
