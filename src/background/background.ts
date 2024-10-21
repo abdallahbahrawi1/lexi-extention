@@ -3,16 +3,26 @@ import { ActionType } from "../types/types";
 
 const saveWord = (wordObj: Word): void => {
   try {
-    chrome.storage.local.get(['savedWords'], async (result) => {
+    chrome.storage.local.get(['savedWords'], (result) => {
       let savedWords = result.savedWords || [];
       
       // Check if the word already exists
       if (!savedWords.some((w: Word) => w.word === wordObj.word)) {
-        const definition = await handleAction(ActionType.DEFINE, wordObj.word);
-        wordObj.definition = definition;
-        // Add the new word if it doesn't exist
+        // Add the new word first
         savedWords.push(wordObj);
-        chrome.storage.local.set({ savedWords });
+        chrome.storage.local.set({ savedWords }, async () => {
+          try {
+            // Fetch the definition after saving
+            const definition = await handleAction(ActionType.DEFINE, wordObj.word);
+            // Update the word object with the fetched definition
+            wordObj.definition = definition;
+
+            // Update the savedWords in local storage with the new definition
+            chrome.storage.local.set({ savedWords });
+          } catch (definitionError) {
+            console.error("Error updating definition:", definitionError);
+          }
+        });
       }
     });
   } catch (error) {
@@ -20,6 +30,7 @@ const saveWord = (wordObj: Word): void => {
     throw new Error("Failed to save word");
   }
 };
+
 
 
 const saveSentence = (sentence: string): void => {

@@ -2,21 +2,21 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 
 import React from "react";
 import { createRoot } from "react-dom/client";
-import '../assets/tailwind.css'; // Include Tailwind CSS styles
+import '../assets/tailwind.css'; 
 import Routes from "./Routes";
 import { HashRouter as Router } from "react-router-dom";
 
 
 function init() {
-  const appContainer = document.createElement('div'); // Create container
-  document.body.appendChild(appContainer); // Append to body
+  const appContainer = document.createElement('div');
+  document.body.appendChild(appContainer); 
 
   if (!appContainer) {
     throw new Error("App container not found");
   }
 
-  const root = createRoot(appContainer); // Create React root
-  root.render(<Router><Routes /></Router>); // Render the Popup component
+  const root = createRoot(appContainer); 
+  root.render(<Router><Routes /></Router>);
 }
 
-init(); // Initialize the app
+init();

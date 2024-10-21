@@ -11,7 +11,7 @@ const Flashcards = () => {
   const [flipped, setFlipped] = useState(false);
 
   const { words, setWords } = useWords();
-  const { updateMemorizationStatus } = useMemorization(words, currentIndex);
+  const { updateMemorizationStatus } = useMemorization(words, currentIndex, setWords); // Pass setWords
 
   const handleFlip = () => {
     setFlipped((prev) => !prev);
